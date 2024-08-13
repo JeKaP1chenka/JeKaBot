@@ -1,0 +1,5 @@
+yt-dlp==2024.8.6
+aiogram==3.11.0
+moviepy==1.0.3
+pillow==8.4.0
+python-dotenv==1.0.1
