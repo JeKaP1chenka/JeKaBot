@@ -24,5 +24,6 @@ services:
     build: .
     depends_on:
       - wireguard
+    network_mode: "service:wireguard"
     volumes:
       - .:/app
