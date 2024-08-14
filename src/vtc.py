@@ -3,6 +3,7 @@ import os
 import re
 
 import yt_dlp
+from yt_dlp.utils import download_range_func
 
 from aiogram.filters import CommandObject
 from aiogram.types import Message, FSInputFile
@@ -20,14 +21,14 @@ duration_pattern = re.compile(duration_regex)
 
 
 def download(link, name='%(title)s', start_time="00:00:00", duration=60):
+    temp = datetime.datetime.strptime(start_time, "%H:%M:%S")
+    start = (temp.hour * 60 * 60) + temp.minute * 60 + temp.second
+    end = start + duration
     ydl_opts = {
         'format': 'bestvideo+bestaudio/best', #берем самое лучшее качество видео и фото
         'outtmpl': '{}.%(ext)s'.format(name), #наше выбраное имя, если его не было, то стандартное - название видео на самом сайте
-        'postprocessor_args': [
-            '-ss', start_time,  # Начало видео
-            '-to', (datetime.datetime.strptime(start_time, "%H:%M:%S") + datetime.timedelta(seconds=duration)).strftime("%H:%M:%S")  # Конец видео (1 минута)
-        ],
-        'prefer_ffmpeg': True
+        'download_ranges': download_range_func(None, [(start, end)]),
+        'force_keyframes_at_cuts': True,
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info_dict = ydl.extract_info(link, download=True)
