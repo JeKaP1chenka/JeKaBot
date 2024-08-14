@@ -25,7 +25,7 @@ def download(link, name='%(title)s', start_time="00:00:00", duration=60):
     start = (temp.hour * 60 * 60) + temp.minute * 60 + temp.second
     end = start + duration
     ydl_opts = {
-        'format': 'bestvideo+bestaudio/best', #берем самое лучшее качество видео и фото
+        'format': 'bestvideo[height<=480]+bestaudio/best[height<=480]', #берем самое лучшее качество видео и фото
         'outtmpl': '{}.%(ext)s'.format(name), #наше выбраное имя, если его не было, то стандартное - название видео на самом сайте
         'download_ranges': download_range_func(None, [(start, end)]),
         'force_keyframes_at_cuts': True,
