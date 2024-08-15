@@ -11,7 +11,16 @@ from aiogram.types import Message, FSInputFile
 from moviepy.editor import VideoFileClip
 from moviepy.video.fx import margin
 
-youtube_regex = r"^(((https:\/\/)?w{3}\.youtube\.com)|(youtube\.com))(\/watch\?v=.*$)"
+# !vtc https://www.youtube.com/watch?v=sUjsYUoSZOE 00:01:34 2
+# !vtc https://youtube.com/watch?v=sUjsYUoSZOE 00:01:34 2
+# !vtc youtube.com/watch?v=sUjsYUoSZOE 00:01:34 2
+# !vtc https://youtu.be/sUjsYUoSZOE?si=R6iGIG8-6A49WMSw 00:01:34 2
+# !vtc youtu.be/sUjsYUoSZOE?si=R6iGIG8-6A49WMSw 00:01:34 2
+# !vtc https://m.youtube.com/watch?v=sUjsYUoSZOE 00:01:34 2
+# !vtc m.youtube.com/watch?v=sUjsYUoSZOE 00:01:34 2
+
+
+youtube_regex = r"^((https:\/\/)?)(((www.)|(m.))?)(youtu)((be)|(\.be))(.com)?\/(watch)?((\?v=.*)|.*\?si=.*)$"
 time_format_regex = r"^([0-5][0-9]:){2}[0-5][0-9]$"
 duration_regex = r"^(([0-9])||([1-5][0-9])||60)$"
 
@@ -100,7 +109,7 @@ async def process_vtc_command(message: Message, command: CommandObject, flag_cor
     start_time = "00:00:00"
     duration = "60"
 
-    if len(args_) < 0 or len(args_) > 3:
+    if len(args_) < 1 or len(args_) > 3:
         return await message.answer("Incorrect command format")
     if not youtube_pattern.match(args_[0]):
         return await message.answer("The link is not valid")
@@ -122,10 +131,15 @@ async def process_vtc_command(message: Message, command: CommandObject, flag_cor
             start_time = args_[1]
             duration = args_[2]
 
+    await message.answer("Request processing...")
     print(link)
     print(start_time)
     print(int(duration))
-    await message.answer("Request processing...")
-    video_name = f"video_{datetime.datetime.now().strftime('%Y-%m-%d_%H.%M.%S')}"
-    video_path = download(link, video_name, start_time, int(duration))
-    await process_and_send_video(message, video_path, flag_corp)
+    try:
+        video_name = f"video_{datetime.datetime.now().strftime('%Y-%m-%d_%H:%M:%S.%f')}"
+        video_path = download(link, video_name, start_time, int(duration))
+        await process_and_send_video(message, video_path, flag_corp)
+    except Exception as e:
+        print(type(e))
+        print(e)
+        await message.answer(f"Oops something went wrong")
